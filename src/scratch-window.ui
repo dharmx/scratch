@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk" version="4.0"/>
+
+  <object class="GtkApplicationWindow" id="win">
+    <property name="title">Scratch</property>
+    <property name="default-width">600</property>
+    <property name="default-height">600</property>
+
+    <child>
+      <object class="GtkBox" id="bxv">
+        <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
+        <property name="spacing">10</property>
+
+        <child>
+          <object class="GtkBox" id="bxh">
+            <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+            <property name="spacing">10</property>
+            <property name="halign">GTK_ALIGN_CENTER</property>
+
+            <child>
+              <object class="GtkButton" id="btn-open">
+                <property name="label">Open</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn-save">
+                <property name="label">Save</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkButton" id="btn-stick">
+                <property name="label">Stick</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn-hide">
+                <property name="label">Hide</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn-close">
+                <property name="label">Close</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkScrolledWindow" id="scro-win">
+            <property name="vexpand">TRUE</property>
+            <property name="hexpand">TRUE</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
+
+<!--
+vim:filetype=xml
+-->
