@@ -16,19 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "scratch-textview.h"
+#include "scratch.h"
 
-static void open_button_clicked(GtkButton* self, gpointer user_data) {}
+static void open_button_clicked(GtkButton* self, gpointer user_data) {
+    GtkScrolledWindow* scrolled_window;
+    ScratchTextView* text_view;
+
+    GtkTextBuffer* text_buffer;
+
+    scrolled_window = GTK_SCROLLED_WINDOW(user_data);
+    text_view = SCRATCH_TEXT_VIEW(gtk_scrolled_window_get_child(scrolled_window));
+    text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+}
 
 static void save_button_clicked(GtkButton* self, gpointer user_data) {}
 
-static void close_button_clicked(GtkButton* self, gpointer user_data) {}
+static void close_button_clicked(GtkButton* self, gpointer user_data) {
+    gtk_window_destroy(GTK_WINDOW(gtk_widget_get_ancestor(GTK_WIDGET(self), GTK_TYPE_WINDOW)));
+}
 
-static void hide_button_clicked(GtkButton* self, gpointer user_data) {}
+static void hide_button_clicked(GtkButton* self, GtkWidget* window) {
+    if (GDK_IS_X11_DISPLAY(gtk_widget_get_display(window)))
+        xhide_window(window);
+}
 
-static void stick_button_clicked(GtkButton* self, gpointer user_data) {}
-
-static void startup_callback(GApplication* self, gpointer user_data) {
+static void startup_callback(GApplication* application, gpointer user_data) {
     GtkBuilder* builder;
     GtkApplicationWindow* window;
     GdkDisplay* display;
@@ -37,7 +49,6 @@ static void startup_callback(GApplication* self, gpointer user_data) {
     GtkScrolledWindow* scrolled_window;
     GtkButton* open_button;
     GtkButton* save_button;
-    GtkButton* stick_button;
     GtkButton* hide_button;
     GtkButton* close_button;
 
@@ -49,26 +60,30 @@ static void startup_callback(GApplication* self, gpointer user_data) {
     scrolled_window = GTK_SCROLLED_WINDOW(gtk_builder_get_object(builder, "scro-win"));
     open_button = GTK_BUTTON(gtk_builder_get_object(builder, "btn-open"));
     save_button = GTK_BUTTON(gtk_builder_get_object(builder, "btn-save"));
-    stick_button = GTK_BUTTON(gtk_builder_get_object(builder, "btn-stick"));
-    hide_button = GTK_BUTTON(gtk_builder_get_object(builder, "btn-hide"));
     close_button = GTK_BUTTON(gtk_builder_get_object(builder, "btn-close"));
+
+    hide_button = GTK_BUTTON(gtk_builder_get_object(builder, "btn-hide"));
 
     g_signal_connect(open_button, "clicked", G_CALLBACK(open_button_clicked), scrolled_window);
     g_signal_connect(save_button, "clicked", G_CALLBACK(save_button_clicked), scrolled_window);
     g_signal_connect(close_button, "clicked", G_CALLBACK(close_button_clicked), scrolled_window);
-    g_signal_connect(stick_button, "clicked", G_CALLBACK(stick_button_clicked), NULL);
-    g_signal_connect(hide_button, "clicked", G_CALLBACK(hide_button_clicked), NULL);
+    g_signal_connect(hide_button, "clicked", G_CALLBACK(hide_button_clicked), window);
 
     gtk_css_provider_load_from_resource(provider, "/org/gtk/scratch/src/scratch-style.css");
-    gtk_style_context_add_provider_for_display(display, GTK_STYLE_PROVIDER(provider),
-                                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    gtk_style_context_add_provider_for_display(
+        display, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+    );
+    gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(application));
 }
 
-static void open_callback(GApplication* self, gpointer user_data) {}
+static void activate_callback(GApplication* self, gpointer user_data) {
+    GtkWindow* window = NULL;
 
-static void activate_callback(GApplication* self, gpointer files, gint total_files, gchar* hint, gpointer user_data) {
-    g_print("This is working!\n");
+    window = gtk_application_get_active_window(GTK_APPLICATION(self));
+    gtk_window_present(window);
 }
+
+static void open_callback(GApplication* self, gpointer files, gint total_files, gchar* hint, gpointer user_data) {}
 
 #define APPLICATION_ID "org.gtk.scratch"
 

@@ -1,5 +1,8 @@
 all: link
 
+install: link
+	cp _build/scratch /usr/bin/scratch
+
 run: link
 	@echo ====THE PROGRAM STARTS FROM HERE====
 	@_build/scratch

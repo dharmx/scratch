@@ -26,7 +26,25 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(ScratchTextView, scratch_text_view, SCRATCH, TEXT_VIEW, GtkTextView)
 
+enum ScratchTextViewOpenResponseType {
+    SCRATCH_OPEN_RESPONSE_SUCESS,
+    SCRATCH_OPEN_RESPONSE_CANCEL,
+    SCRATCH_OPEN_RESPONSE_ERROR,
+};
+
 ScratchTextView* scratch_text_view_new(void);
+
+ScratchTextView* scratch_text_view_new_with_file(GFile*);
+
+GFile* scratch_text_view_get_file(ScratchTextView*);
+
+void scratch_text_view_set_file(ScratchTextView*, GFile*);
+
+void scratch_text_view_save(ScratchTextView*);
+
+void scratch_text_view_save_as(ScratchTextView*);
+
+void scratch_text_view_open(ScratchTextView*, GtkWindow*);
 
 G_END_DECLS
 

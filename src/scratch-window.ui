@@ -29,12 +29,6 @@
                 <property name="label">Save</property>
               </object>
             </child>
-
-            <child>
-              <object class="GtkButton" id="btn-stick">
-                <property name="label">Stick</property>
-              </object>
-            </child>
             <child>
               <object class="GtkButton" id="btn-hide">
                 <property name="label">Hide</property>
