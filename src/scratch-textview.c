@@ -56,12 +56,10 @@ static void scratch_text_view_class_init(ScratchTextViewClass* self_class) {
 
     scratch_text_view_signals[CHANGE_FILE] = g_signal_newv(
         "change-file", G_TYPE_FROM_CLASS(self_class), G_SIGNAL_RUN_LAST | G_SIGNAL_NO_HOOKS | G_SIGNAL_NO_RECURSE, 0,
-        NULL, NULL, NULL, G_TYPE_NONE, 0, NULL
-    );
+        NULL, NULL, NULL, G_TYPE_NONE, 0, NULL);
     scratch_text_view_signals[OPEN_RESPONSE] = g_signal_new(
         "open-response", G_TYPE_FROM_CLASS(self_class), G_SIGNAL_RUN_LAST | G_SIGNAL_NO_HOOKS | G_SIGNAL_NO_RECURSE, 0,
-        NULL, NULL, NULL, G_TYPE_NONE, 1, G_TYPE_INT, NULL
-    );
+        NULL, NULL, NULL, G_TYPE_NONE, 1, G_TYPE_INT, NULL);
 }
 
 static void scratch_text_view_init(ScratchTextView* self) {}
@@ -119,8 +117,7 @@ static void open_dialog_response(GtkDialog* self, int response, ScratchTextView*
         g_signal_emit(text_view, scratch_text_view_signals[CHANGE_FILE], 0, SCRATCH_OPEN_RESPONSE_CANCEL, NULL);
     } else if (!G_IS_FILE(file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(self)))) {
         show_error_dialog(
-            GTK_WINDOW(self), error, "ScratchTextView: gtk_file_chooser_get_file() does not return GFile!"
-        );
+            GTK_WINDOW(self), error, "ScratchTextView: gtk_file_chooser_get_file() does not return GFile!");
         g_error_free(error);
         g_signal_emit(text_view, scratch_text_view_signals[OPEN_RESPONSE], 0, SCRATCH_OPEN_RESPONSE_ERROR, NULL);
     } else if (!g_file_load_contents(file, NULL, &contents, &length, NULL, &error)) {
@@ -152,8 +149,7 @@ void scratch_text_view_open(ScratchTextView* self, GtkWindow* window) {
 
     dialog = gtk_file_chooser_dialog_new(
         "Select File", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT,
-        NULL
-    );
+        NULL);
     g_signal_connect(dialog, "response", G_CALLBACK(open_dialog_response), self);
     gtk_widget_show(dialog);
 }

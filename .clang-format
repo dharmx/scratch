@@ -18,5 +18,5 @@ BraceWrapping:
   AfterStruct: false
   SplitEmptyFunction: false
   AfterCaseLabel: true
-AlignAfterOpenBracket: BlockIndent
+AlignAfterOpenBracket: AlwaysBreak
 ...

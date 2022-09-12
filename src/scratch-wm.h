@@ -23,19 +23,30 @@
 #ifdef GDK_WINDOWING_X11
 #include <gdk/x11/gdkx.h>
 
-void xset_state(Display*, Window, int);
-void xset_hide(Display*, Window, bool);
-void xhide_window(GtkWidget*);
+#define XDIAG_ERR(METHOD, RETURN)                                                                                      \
+    switch (RETURN) {                                                                                                  \
+        case BadValue: g_warning("%s: returned BadValue!", METHOD); break;                                             \
+        case BadAlloc: g_warning("%s: returned BadAlloc!", METHOD); break;                                             \
+        case BadWindow: g_warning("%s: returned BadWindow!", METHOD); break;                                           \
+        default: g_info("%s: call is successful!", METHOD); break;                                                     \
+    }
+
+typedef struct {
+    uint32_t _NET_WM_STATE;
+    uint32_t _NET_WM_STATE_HIDDEN;
+
+    uint32_t _NET_WM_STATE_REMOVE;
+    uint32_t _NET_WM_STATE_ADD;
+    uint32_t _NET_WM_STATE_TOGGLE;
+
+    uint32_t _NO_ATOM;
+} AtomMap;
+
+Atom get_xatom(Display*, const char* name);
+void init_ewmh_atoms(Display*, AtomMap*);
+bool set_xwindow_visiblity(Display*, Window, bool);
 #endif
 
-#ifdef GDK_WINDOWING_WAYLAND
-#include <gdk/wayland/gdkwayland.h>
-#endif
-
-#ifdef GDK_WINDOWING_BROADWAY
-#include <gdk/broadway/gdkbroadway.h>
-#endif
-
-void hide_window(GtkWindow*);
+bool hide_window(GtkWindow*);
 
 // vim:filetype=c

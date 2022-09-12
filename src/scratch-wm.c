@@ -16,51 +16,67 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "scratch.h"
+#include "scratch-wm.h"
 
 #ifdef GDK_WINDOWING_X11
 
-#define WM_STATE_VAL(S) ((S) == 1 ? "normal" : (S) == 3 ? "iconic" : "withdrawn")
-
-void xset_state(Display* display, Window window, int state) {
-    Atom wm_state = XInternAtom(display, "WM_STATE", FALSE);
-    long data[2] = {state, None};
-
-    switch (XChangeProperty(display, window, wm_state, wm_state, 32, PropModeReplace, (u_char*) &data, 2)) {
-        case BadAlloc: g_warning("BadAlloc ERROR on %lx!\n", window); break;
-        case BadAtom: g_warning("BadAtom ERROR on %lx!\n", window); break;
-        case BadMatch: g_warning("BadMatch ERROR on %lx!\n", window); break;
-        case BadValue: g_warning("BadValue ERROR on %lx!\n", window); break;
-        case BadWindow: g_warning("BadWindow ERROR on %lx!\n", window); break;
-        default: g_info("Succesfully set 0x%lx to %s state.\n", window, WM_STATE_VAL(state)); break;
-    }
+Atom get_xatom(Display* display, const char* name) {
+    Atom atom = XInternAtom(display, name, False);
+    XDIAG_ERR("XInternAtom", atom)
+    return atom;
 }
 
-void xset_hide(Display* display, Window window, bool hidden) {
-    if (hidden) {
-        XUnmapWindow(display, window); // Actually sets it to WithdrawnState
-        xset_state(display, window, IconicState); // redundant - help
-        // This works (if NormalState) but not if the window is in WithdrawnState
-        // The above statement is redundant - I'll take a look at this later.
-    } else {
-        xset_state(display, window, NormalState);
-        XMapWindow(display, window);
-    }
-    XFlush(display);
+void init_ewmh_atoms(Display* display, AtomMap* ewmh_atoms) {
+    ewmh_atoms->_NET_WM_STATE = get_xatom(display, "_NET_WM_STATE");
+    ewmh_atoms->_NET_WM_STATE_HIDDEN = get_xatom(display, "_NET_WM_STATE_HIDDEN");
+    ewmh_atoms->_NET_WM_STATE_REMOVE = 0;
+    ewmh_atoms->_NET_WM_STATE_ADD = 1;
+    ewmh_atoms->_NET_WM_STATE_TOGGLE = 2;
+    ewmh_atoms->_NO_ATOM = None;
 }
 
-void xhide_window(GtkWidget* window) {
-    GdkDisplay* display;
-    GdkSurface* surface;
+// clang-format off
+bool set_xwindow_visiblity(Display* display, Window window, bool visible) {
+    AtomMap EWMH;
+    init_ewmh_atoms(display, &EWMH);
 
-    display = gtk_widget_get_display(window);
-    surface = gtk_native_get_surface(gtk_widget_get_native(window));
+    XClientMessageEvent payload = {
+        .type = ClientMessage,
+        .message_type = EWMH._NET_WM_STATE,
+        .format = 32,
+        .window = window,
+        .send_event = True,
+        .display = display,
+        .data.l = {
+            visible ? EWMH._NET_WM_STATE_REMOVE : EWMH._NET_WM_STATE_ADD,
+            EWMH._NET_WM_STATE_HIDDEN,
+            EWMH._NO_ATOM
+        }
+    };
 
-    Display* xdisplay = gdk_x11_display_get_xdisplay(display);
-    Window xwindow = gdk_x11_surface_get_xid(surface);
-    xset_hide(xdisplay, xwindow, true);
+    int status;
+    status = XSendEvent(display, window, True, SubstructureRedirectMask | SubstructureNotifyMask, (XEvent*) &payload);
+    XDIAG_ERR("XSendEvent", status)
+    status = XFlush(display);
+    XDIAG_ERR("XFlush", status)
+    return status;
 }
 
 #endif
+
+bool hide_window(GtkWindow* window) {
+    GdkDisplay* display = gtk_widget_get_display(GTK_WIDGET(window));
+    GdkSurface* surface = gtk_native_get_surface(gtk_widget_get_native(GTK_WIDGET(window)));
+    bool status;
+
+#ifdef GDK_WINDOWING_X11
+    Display* xdisplay = gdk_x11_display_get_xdisplay(display);
+    Window xwindow = gdk_x11_surface_get_xid(surface);
+    if (GDK_IS_X11_DISPLAY(display)) status = set_xwindow_visiblity(xdisplay, xwindow, false);
+    else g_critical("Unsupported GDK Backend!");
+#endif
+
+    return status;
+}
 
 // vim:filetype=c

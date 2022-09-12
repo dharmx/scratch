@@ -35,10 +35,7 @@ static void close_button_clicked(GtkButton* self, gpointer user_data) {
     gtk_window_destroy(GTK_WINDOW(gtk_widget_get_ancestor(GTK_WIDGET(self), GTK_TYPE_WINDOW)));
 }
 
-static void hide_button_clicked(GtkButton* self, GtkWidget* window) {
-    if (GDK_IS_X11_DISPLAY(gtk_widget_get_display(window)))
-        xhide_window(window);
-}
+static void hide_button_clicked(GtkButton* self, GtkWindow* window) { hide_window(window); }
 
 static void startup_callback(GApplication* application, gpointer user_data) {
     GtkBuilder* builder;
@@ -71,8 +68,7 @@ static void startup_callback(GApplication* application, gpointer user_data) {
 
     gtk_css_provider_load_from_resource(provider, "/org/gtk/scratch/src/scratch-style.css");
     gtk_style_context_add_provider_for_display(
-        display, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
-    );
+        display, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     gtk_window_set_application(GTK_WINDOW(window), GTK_APPLICATION(application));
 }
 
